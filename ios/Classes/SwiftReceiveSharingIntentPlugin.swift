@@ -19,9 +19,9 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
     // Singleton is required for calling functions directly from AppDelegate
     // - it is required if the developer is using also another library, which requires to call "application(_:open:options:)"
     // -> see Example app
-    public static let instance = SwiftReceiveSharingIntentPlugin()
     
     public static func register(with registrar: FlutterPluginRegistrar) {
+        let instance = SwiftReceiveSharingIntentPlugin()
         let channel = FlutterMethodChannel(name: kMessagesChannel, binaryMessenger: registrar.messenger())
         registrar.addMethodCallDelegate(instance, channel: channel)
         
@@ -48,8 +48,8 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
     // By Adding bundle id to prefix, we'll ensure that the correct application will be opened
     // - found the issue while developing multiple applications using this library, after "application(_:open:options:)" is called, the first app using this librabry (first app by bundle id alphabetically) is opened
     public func hasMatchingSchemePrefix(url: URL?) -> Bool {
-        if let url = url, let appDomain = Bundle.main.bundleIdentifier {
-            return url.absoluteString.hasPrefix("\(kSchemePrefix)-\(appDomain)")
+        if let url = url {
+            return url.absoluteString.hasPrefix("\(kSchemePrefix)")
         }
         return false
     }
@@ -110,9 +110,8 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
     }
     
     private func handleUrl(url: URL?, setInitialData: Bool) -> Bool {
-        let appGroupId = Bundle.main.object(forInfoDictionaryKey: kAppGroupIdKey) as? String
-        let defaultGroupId = "group.\(Bundle.main.bundleIdentifier!)"
-        let userDefaults = UserDefaults(suiteName: appGroupId ?? defaultGroupId)
+        let appDomain = Bundle.main.bundleIdentifier!
+        let userDefaults = UserDefaults(suiteName: "group.\(appDomain)")
         
         let message = userDefaults?.string(forKey: kUserDefaultsMessageKey)
         if let json = userDefaults?.object(forKey: kUserDefaultsKey) as? Data {
